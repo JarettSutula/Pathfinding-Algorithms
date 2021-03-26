@@ -5,6 +5,13 @@ Pathfinding Algorithms Thesis Project
 For now, this will serve as the main file for the project.
 As the project grows, this will be split into separate files for
 ease of reading and working.
+
+General controls:
+Left click mouse = place obstacle block.
+Right click mouse = set grid block back to blank block.
+press Q = place starting node wherever mouse is hovering.
+press E = place ending node wherever mouse is hovering.
+press spacebar = clear grid.
 """
 
 import pygame
@@ -41,7 +48,7 @@ grid = [[0 for i in range(20)] for j in range(20)]
 # grid[3][19] = 3
 
 
-# Let's call a function that will render the graphs.
+# Let's call a function that will render the grid.
 def render_grid():
     # Loop through the entirety of the grid and render the correct png.
     for i in range(20):
@@ -54,6 +61,14 @@ def render_grid():
                 screen.blit(start_node, (32 * i, 32 * j))
             elif grid[i][j] == 3:
                 screen.blit(end_node, (32 * i, 32 * j))
+
+
+# Let's call a function that will clear the grid.
+def clear_grid():
+    # Loop through the entirety of the grid and set back to 0.
+    for i in range(20):
+        for j in range(20):
+            grid[i][j] = 0
 
 
 # -------- Main Program Loop -----------
@@ -74,6 +89,20 @@ while not done:
             # If we are right clicking (3), "erase" by setting value to 0.
             elif event.button == 3:
                 grid[pos[0] // 32][pos[1] // 32] = 0
+
+        if event.type == pygame.KEYDOWN:
+            # Check for pressing down start_node button
+            if event.key == pygame.K_q:
+                pos = pygame.mouse.get_pos()
+                grid[pos[0]//32][pos[1]//32] = 2
+
+            # Check for pressing down end_node button
+            if event.key == pygame.K_e:
+                pos = pygame.mouse.get_pos()
+                grid[pos[0]//32][pos[1]//32] = 3
+
+            if event.key == pygame.K_SPACE:
+                clear_grid()
 
     # background image
     screen.fill(WHITE)
