@@ -1,7 +1,11 @@
-# Pathfinding-Algorithms
+# Pathfinding-Algorithms 
 <p align="center">
-  <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Marist_College_Seal_-_Vector.svg/1200px-Marist_College_Seal_-    _Vector.svg.png" width="150" height="150" />
-</p>
+    <img src="https://i.imgur.com/8gj1TDE.png">
+<p align="center">
+    <a href="https://www.python.org/" alt="python">
+        <img src="https://img.shields.io/badge/Made%20with-Python-1f425f.svg" /></a>
+</p>  
+      
 A simple visual approach to explaining pathfinding algorithms.  
 Written in python and using pygame to implement graphical interface.  
 Written by Jarett Sutula with the help of Professor Brian Gormanly of Marist College.  
@@ -17,13 +21,17 @@ Written throughout the 2021 Spring Semester, this project serves as a crucial vi
 
 ### Project Goals 
 Week-by-week I will update these goals, add or remove goals, and highlight progress that has been made.
-* ~~Create a basic grid system using pygame's graphical interface.~~
-* Allow the user to create start and end nodes on the grid that the algorithms will traverse between.
-* Allow the user to create obstacles on the grid that the algorithms have to traverse around.
-* ~~Allow the user to clear the grid.~~
-* Implement BFS.
-* Implement DFS.
-* Implement Dijsktra's Algorithm.
-* Implement A*.
-* Allow the user to press a button to go step-by-step through the algorithm's process.
-* Add UI buttons to clear grid, change algorithms, etc.
+- [x] Create a basic grid system using pygame's graphical interface.
+- [ ] Allow the user to create start and end nodes on the grid that the algorithms will traverse between.
+- [ ] Allow the user to create obstacles on the grid that the algorithms have to traverse around.
+- [x] Allow the user to clear the grid.
+- [ ] Implement BFS.
+- [ ] Implement DFS.
+- [ ] Implement Dijsktra's Algorithm.
+- [ ] Implement A*.
+- [ ] Allow the user to press a button to go step-by-step through the algorithm's process.
+- [ ] Add UI buttons to clear grid, change algorithms, etc.
+
+<p align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Marist_College_Seal_-_Vector.svg/1200px-Marist_College_Seal_-    _Vector.svg.png" width="150" height="150" />
+</p> 
