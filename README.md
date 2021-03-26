@@ -17,10 +17,10 @@ Written throughout the 2021 Spring Semester, this project serves as a crucial vi
 
 ### Project Goals 
 Week-by-week I will update these goals, add or remove goals, and highlight progress that has been made.
-* Create a basic grid system using pygame's graphical interface.
+* ~~Create a basic grid system using pygame's graphical interface.~~
 * Allow the user to create start and end nodes on the grid that the algorithms will traverse between.
 * Allow the user to create obstacles on the grid that the algorithms have to traverse around.
-* Allow the user to clear the grid.
+* ~~Allow the user to clear the grid.~~
 * Implement BFS.
 * Implement DFS.
 * Implement Dijsktra's Algorithm.
