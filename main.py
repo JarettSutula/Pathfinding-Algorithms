@@ -11,7 +11,8 @@ Left click mouse = place obstacle block.
 Right click mouse = set grid block back to blank block.
 press Q = place starting node wherever mouse is hovering.
 press E = place ending node wherever mouse is hovering.
-press spacebar = clear grid.
+press space bar = clear grid.
+press P = print grid's output to console (for testing).
 """
 
 import pygame
@@ -71,6 +72,14 @@ def clear_grid():
             grid[i][j] = 0
 
 
+def print_grid():
+    # Print out the grid into console.
+    for x in grid:
+        for y in x:
+            print(y, end=" ")
+        print()
+
+
 # -------- Main Program Loop -----------
 while not done:
     # --- Main event loop ---
@@ -103,6 +112,9 @@ while not done:
 
             if event.key == pygame.K_SPACE:
                 clear_grid()
+
+            if event.key == pygame.K_p:
+                print_grid()
 
     # background image
     screen.fill(WHITE)
