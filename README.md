@@ -1,5 +1,4 @@
-# Pathfinding-Algorithms 
-<p align="center">
+ <p align="center">
     <img src="https://i.imgur.com/8gj1TDE.png">
 <p align="center">
     <a href="https://www.python.org/" alt="python">
