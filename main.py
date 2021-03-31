@@ -44,10 +44,10 @@ clock = pygame.time.Clock()
 # 2 = start node
 # 3 = end node
 grid = [[0 for i in range(20)] for j in range(20)]
-# grid[4][5] = 1
-# grid[5][10] = 2
-# grid[3][19] = 3
 
+# Let's set the flags for start_node and end_nodes.
+start_flag = False
+end_flag = False
 
 # Let's call a function that will render the grid.
 def render_grid():
@@ -80,6 +80,21 @@ def print_grid():
         print()
 
 
+def clear_start_node():
+    # Find our start node and clear it.
+    for i in range(20):
+        for j in range(20):
+            if grid[i][j] == 2:
+                grid[i][j] = 0
+
+
+def clear_end_node():
+    # Find our start node and clear it.
+    for i in range(20):
+        for j in range(20):
+            if grid[i][j] == 3:
+                grid[i][j] = 0
+
 # -------- Main Program Loop -----------
 while not done:
     # --- Main event loop ---
@@ -103,12 +118,16 @@ while not done:
             # Check for pressing down start_node button
             if event.key == pygame.K_q:
                 pos = pygame.mouse.get_pos()
+                clear_start_node()
                 grid[pos[0]//32][pos[1]//32] = 2
+                start_flag = True
 
             # Check for pressing down end_node button
             if event.key == pygame.K_e:
                 pos = pygame.mouse.get_pos()
+                clear_end_node()
                 grid[pos[0]//32][pos[1]//32] = 3
+                end_flag = True
 
             if event.key == pygame.K_SPACE:
                 clear_grid()
