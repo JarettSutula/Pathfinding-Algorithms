@@ -88,15 +88,15 @@ while not done:
             done = True
 
         # Check for mouse pressed down.
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEMOTION:
             pos = pygame.mouse.get_pos()
             # Set the corresponding grid value to new value.
-            # If we are left clicking (1), set value to 1.
-            if event.button == 1:
-                grid[pos[0]//32][pos[1]//32] = 1
+            # If we are left clicking, set value to 1 (obstacle)
+            if pygame.mouse.get_pressed()[0]:
+                grid[pos[0] // 32][pos[1] // 32] = 1
 
-            # If we are right clicking (3), "erase" by setting value to 0.
-            elif event.button == 3:
+            # If we are right clicking, "erase" by setting value to 0.
+            if pygame.mouse.get_pressed()[2]:
                 grid[pos[0] // 32][pos[1] // 32] = 0
 
         if event.type == pygame.KEYDOWN:
