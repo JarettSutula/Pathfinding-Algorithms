@@ -11,18 +11,31 @@ Left click mouse = place obstacle block.
 Right click mouse = set grid block back to blank block.
 press Q = place starting node wherever mouse is hovering.
 press E = place ending node wherever mouse is hovering.
-press space bar = clear grid.
+Click button on screen = clear grid.
 press P = print grid's output to console (for testing).
 """
 
 import pygame
 pygame.init()
+pygame.font.init()
 
-# Define white for screen fill later
+# Define colors for screen fill, font
 WHITE = (255, 255, 255)
+GRAY = (105, 105, 105)
+
+# Set font and create text objects.
+font = pygame.font.SysFont('Calibri', 24)
+smaller_font = pygame.font.SysFont('Calibri', 18)
+clear_text = font.render('Click to clear the grid', True, WHITE)
+start_text = smaller_font.render('Press Q to create start node', True, WHITE)
+end_text = smaller_font.render('Press E to create end node', True, WHITE)
+obstacle_text_1 = smaller_font.render('Click and drag left mouse', True, WHITE)
+obstacle_text_2 = smaller_font.render('to create obstacles', True, WHITE)
+obstacle_text_3 = smaller_font.render('Click and drag right mouse', True, WHITE)
+obstacle_text_4 = smaller_font.render('to erase obstacles', True, WHITE)
 
 # Set the width and height of the screen. 20x20 of 32 pixel pngs
-size = (640, 640)
+size = (880, 640)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("pathfinding-algorithms")
 
@@ -46,8 +59,9 @@ clock = pygame.time.Clock()
 grid = [[0 for i in range(20)] for j in range(20)]
 
 # Let's set the flags for start_node and end_nodes.
-start_flag = False
-end_flag = False
+start_node_placed = False
+end_node_placed = False
+
 
 # Let's call a function that will render the grid.
 def render_grid():
@@ -62,6 +76,17 @@ def render_grid():
                 screen.blit(start_node, (32 * i, 32 * j))
             elif grid[i][j] == 3:
                 screen.blit(end_node, (32 * i, 32 * j))
+
+    # Update the start_node and end_node flags to make sure this is runnable.
+    if any(2 in x for x in grid):
+        start_node_placed = True
+    else:
+        start_node_placed = False
+
+    if any(3 in x for x in grid):
+        end_node_placed = True
+    else:
+        end_node_placed = False
 
 
 # Let's call a function that will clear the grid.
@@ -95,6 +120,7 @@ def clear_end_node():
             if grid[i][j] == 3:
                 grid[i][j] = 0
 
+
 # -------- Main Program Loop -----------
 while not done:
     # --- Main event loop ---
@@ -102,44 +128,59 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
 
+        # Check if we clicked the "clear grid" button.
+        if event.type == pygame.MOUSEBUTTONUP:
+            pos = pygame.mouse.get_pos()
+            if 650 < pos[0] < 860 and 90 < pos[1] < 130:
+                clear_grid()
+                start_node_placed = False
+                end_node_placed = False
+
         # Check for mouse pressed down.
         if event.type == pygame.MOUSEMOTION:
             pos = pygame.mouse.get_pos()
-            # Set the corresponding grid value to new value.
-            # If we are left clicking, set value to 1 (obstacle)
-            if pygame.mouse.get_pressed()[0]:
-                grid[pos[0] // 32][pos[1] // 32] = 1
+            if pos[0] < 640:
+                # Set the corresponding grid value to new value.
+                # If we are left clicking, set value to 1 (obstacle)
+                if pygame.mouse.get_pressed()[0]:
+                    grid[pos[0] // 32][pos[1] // 32] = 1
 
-            # If we are right clicking, "erase" by setting value to 0.
-            if pygame.mouse.get_pressed()[2]:
-                grid[pos[0] // 32][pos[1] // 32] = 0
+                # If we are right clicking, "erase" by setting value to 0.
+                if pygame.mouse.get_pressed()[2]:
+                    grid[pos[0] // 32][pos[1] // 32] = 0
 
         if event.type == pygame.KEYDOWN:
             # Check for pressing down start_node button
             if event.key == pygame.K_q:
                 pos = pygame.mouse.get_pos()
-                clear_start_node()
-                grid[pos[0]//32][pos[1]//32] = 2
-                start_flag = True
+                if pos[0] < 640:
+                    clear_start_node()
+                    grid[pos[0]//32][pos[1]//32] = 2
+                    start_node_placed = True
 
             # Check for pressing down end_node button
             if event.key == pygame.K_e:
                 pos = pygame.mouse.get_pos()
-                clear_end_node()
-                grid[pos[0]//32][pos[1]//32] = 3
-                end_flag = True
-
-            if event.key == pygame.K_SPACE:
-                clear_grid()
+                if pos[0] < 640:
+                    clear_end_node()
+                    grid[pos[0]//32][pos[1]//32] = 3
+                    end_node_placed = True
 
             if event.key == pygame.K_p:
                 print_grid()
 
     # background image
-    screen.fill(WHITE)
+    screen.fill(GRAY)
 
     # rendering code
     render_grid()
+    screen.blit(clear_text, (660, 100))
+    screen.blit(start_text, (660, 400))
+    screen.blit(end_text, (665, 440))
+    screen.blit(obstacle_text_1, (670, 280))
+    screen.blit(obstacle_text_2, (695, 300))
+    screen.blit(obstacle_text_3, (665, 340))
+    screen.blit(obstacle_text_4, (695, 360))
 
     # update screen and flip
     pygame.display.flip()
