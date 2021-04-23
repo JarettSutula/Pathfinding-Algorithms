@@ -81,7 +81,7 @@ start_node_placed = False
 end_node_placed = False
 
 
-# Let's call a function that will render the grid.
+# Let's call a function that will render the grid. Pass in start/end node flags.
 def render_grid():
     # Loop through the entirety of the grid and render the correct png.
     for i in range(20):
@@ -100,16 +100,20 @@ def render_grid():
                 screen.blit(unvisited, (32 * j, 32 * i))
 
     # Update the start_node and end_node flags to make sure this is runnable.
-    for x in grid:
-        if any(y.value == 2 for y in x):
-            start_node_placed = True
-        else:
-            start_node_placed = False
-    for x in grid:
-        if any(y.value == 3 for y in x):
-            end_node_placed = True
-        else:
-            end_node_placed = False
+    start_flag = False
+    end_flag = False
+    for i in range(20):
+        for j in range(20):
+            if grid[i][j].value == 2:
+                start_flag = True
+            if grid[i][j].value == 3:
+                end_flag = True
+    if not start_flag:
+        global start_node_placed
+        start_node_placed = False
+    if not end_flag:
+        global end_node_placed
+        end_node_placed = False
 
 
 # Let's call a function that will clear the grid.
