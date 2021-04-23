@@ -14,6 +14,7 @@ press E = place ending node wherever mouse is hovering.
 Click button on screen = clear grid.
 press P = print grid's output to console (for testing).
 """
+from collections import deque
 
 import pygame
 pygame.init()
@@ -55,10 +56,30 @@ clock = pygame.time.Clock()
 
 
 # every node in the grid should start at value = 0 for blank space.
+# Track value, its neighbors, and its coordinates on the grid.
 class Node:
-    def __init__(self):
+    def __init__(self, x, y):
         self.value = 0
         self.neighbors = []
+        self.x = x
+        self.y = y
+
+    # Look in 4 directions around node and add neighbors to self.neighbors
+    def add_neighbors(self):
+        # make sure we are not going out of bounds!
+        # remember... x value = which row it is in. y value = which column it is in.
+        # add down neighbor. x + 1.
+        if self.x < 19:
+            self.neighbors.append(grid[self.x + 1][self.y])
+        # add right neighbor
+        if self.y < 19:
+            self.neighbors.append(grid[self.x][self.y + 1])
+        # add up neighbor
+        if self.x > 0:
+            self.neighbors.append(grid[self.x - 1][self.y])
+        # add left neighbor
+        if self.y > 0:
+            self.neighbors.append(grid[self.x][self.y - 1])
 
 
 # Let's set the grid that we will use for finding paths. 20x20.
@@ -70,15 +91,20 @@ class Node:
 # 5 = unvisited
 
 # Create the grid, then replace it with new Nodes().
-grid = [[0 for i in range(20)] for j in range(20)]
+grid = [[0 for a in range(20)] for b in range(20)]
 
 for i in range(20):
     for j in range(20):
-        grid[i][j] = Node()
+        grid[i][j] = Node(i, j)
 
 # Let's set the flags for start_node and end_nodes.
 start_node_placed = False
 end_node_placed = False
+
+# a deque allows us to quickly append and pop instantly. here will go the nodes to be added and searched.
+queue = deque()
+# this will hold all of the nodes we have traveled too.
+visited_nodes = []
 
 
 # Let's call a function that will render the grid. Pass in start/end node flags.
@@ -137,6 +163,12 @@ def print_flags():
     print(end_node_placed)
 
 
+def print_neighbors(i, j):
+    for node in grid[i][j].neighbors:
+        print(node.x, node.y, node.value)
+    print()
+
+
 def clear_start_node():
     # Find our start node and clear it.
     for i in range(20):
@@ -151,6 +183,14 @@ def clear_end_node():
         for j in range(20):
             if grid[i][j].value == 3:
                 grid[i][j].value = 0
+
+
+def try_start():
+    if start_node_placed and end_node_placed:
+        for x in grid:
+            for y in x:
+                y.add_neighbors()
+        print("added neighbors")
 
 
 # -------- Main Program Loop -----------
@@ -203,6 +243,16 @@ while not done:
 
             if event.key == pygame.K_o:
                 print_flags()
+
+            if event.key == pygame.K_i:
+                try_start()
+
+            if event.key == pygame.K_u:
+                pos = pygame.mouse.get_pos()
+                if pos[0] < 640:
+                    x = pos[1] // 32
+                    y = pos[0] // 32
+                    print_neighbors(x, y)
 
     # background image
     screen.fill(GRAY)
