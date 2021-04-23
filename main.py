@@ -44,6 +44,8 @@ start_node = pygame.image.load("images/start_node.png").convert()
 end_node = pygame.image.load("images/end_node.png").convert()
 blank_space = pygame.image.load("images/blank_space.png").convert()
 obstacle = pygame.image.load("images/obstacle.png").convert()
+unvisited = pygame.image.load("images/unvisited.png").convert()
+visited = pygame.image.load("images/visited.png").convert()
 
 # Keep loop running until we quit
 done = False
@@ -51,12 +53,28 @@ done = False
 # FPS clock
 clock = pygame.time.Clock()
 
+
+# every node in the grid should start at value = 0 for blank space.
+class Node:
+    def __init__(self):
+        self.value = 0
+        self.neighbors = []
+
+
 # Let's set the grid that we will use for finding paths. 20x20.
 # 0 = blank space
 # 1 = obstacle
 # 2 = start node
 # 3 = end node
+# 4 = visited
+# 5 = unvisited
+
+# Create the grid, then replace it with new Nodes().
 grid = [[0 for i in range(20)] for j in range(20)]
+
+for i in range(20):
+    for j in range(20):
+        grid[i][j] = Node()
 
 # Let's set the flags for start_node and end_nodes.
 start_node_placed = False
@@ -68,25 +86,30 @@ def render_grid():
     # Loop through the entirety of the grid and render the correct png.
     for i in range(20):
         for j in range(20):
-            if grid[i][j] == 0:
-                screen.blit(blank_space, (32 * i, 32 * j))
-            elif grid[i][j] == 1:
-                screen.blit(obstacle, (32 * i, 32 * j))
-            elif grid[i][j] == 2:
-                screen.blit(start_node, (32 * i, 32 * j))
-            elif grid[i][j] == 3:
-                screen.blit(end_node, (32 * i, 32 * j))
+            if grid[i][j].value == 0:
+                screen.blit(blank_space, (32 * j, 32 * i))
+            elif grid[i][j].value == 1:
+                screen.blit(obstacle, (32 * j, 32 * i))
+            elif grid[i][j].value == 2:
+                screen.blit(start_node, (32 * j, 32 * i))
+            elif grid[i][j].value == 3:
+                screen.blit(end_node, (32 * j, 32 * i))
+            elif grid[i][j].value == 4:
+                screen.blit(visited, (32 * j, 32 * i))
+            elif grid[i][j].value == 5:
+                screen.blit(unvisited, (32 * j, 32 * i))
 
     # Update the start_node and end_node flags to make sure this is runnable.
-    if any(2 in x for x in grid):
-        start_node_placed = True
-    else:
-        start_node_placed = False
-
-    if any(3 in x for x in grid):
-        end_node_placed = True
-    else:
-        end_node_placed = False
+    for x in grid:
+        if any(y.value == 2 for y in x):
+            start_node_placed = True
+        else:
+            start_node_placed = False
+    for x in grid:
+        if any(y.value == 3 for y in x):
+            end_node_placed = True
+        else:
+            end_node_placed = False
 
 
 # Let's call a function that will clear the grid.
@@ -94,31 +117,36 @@ def clear_grid():
     # Loop through the entirety of the grid and set back to 0.
     for i in range(20):
         for j in range(20):
-            grid[i][j] = 0
+            grid[i][j].value = 0
 
 
 def print_grid():
     # Print out the grid into console.
     for x in grid:
         for y in x:
-            print(y, end=" ")
+            print(y.value, end=" ")
         print()
+
+
+def print_flags():
+    print(start_node_placed)
+    print(end_node_placed)
 
 
 def clear_start_node():
     # Find our start node and clear it.
     for i in range(20):
         for j in range(20):
-            if grid[i][j] == 2:
-                grid[i][j] = 0
+            if grid[i][j].value == 2:
+                grid[i][j].value = 0
 
 
 def clear_end_node():
     # Find our start node and clear it.
     for i in range(20):
         for j in range(20):
-            if grid[i][j] == 3:
-                grid[i][j] = 0
+            if grid[i][j].value == 3:
+                grid[i][j].value = 0
 
 
 # -------- Main Program Loop -----------
@@ -143,11 +171,11 @@ while not done:
                 # Set the corresponding grid value to new value.
                 # If we are left clicking, set value to 1 (obstacle)
                 if pygame.mouse.get_pressed()[0]:
-                    grid[pos[0] // 32][pos[1] // 32] = 1
+                    grid[pos[1] // 32][pos[0] // 32].value = 1
 
                 # If we are right clicking, "erase" by setting value to 0.
                 if pygame.mouse.get_pressed()[2]:
-                    grid[pos[0] // 32][pos[1] // 32] = 0
+                    grid[pos[1] // 32][pos[0] // 32].value = 0
 
         if event.type == pygame.KEYDOWN:
             # Check for pressing down start_node button
@@ -155,7 +183,7 @@ while not done:
                 pos = pygame.mouse.get_pos()
                 if pos[0] < 640:
                     clear_start_node()
-                    grid[pos[0]//32][pos[1]//32] = 2
+                    grid[pos[1]//32][pos[0]//32].value = 2
                     start_node_placed = True
 
             # Check for pressing down end_node button
@@ -163,11 +191,14 @@ while not done:
                 pos = pygame.mouse.get_pos()
                 if pos[0] < 640:
                     clear_end_node()
-                    grid[pos[0]//32][pos[1]//32] = 3
+                    grid[pos[1]//32][pos[0]//32].value = 3
                     end_node_placed = True
 
             if event.key == pygame.K_p:
                 print_grid()
+
+            if event.key == pygame.K_o:
+                print_flags()
 
     # background image
     screen.fill(GRAY)
