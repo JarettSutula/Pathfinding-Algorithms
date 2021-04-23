@@ -63,6 +63,8 @@ class Node:
         self.neighbors = []
         self.x = x
         self.y = y
+        self.previous_node = None
+        self.visited = False
 
     # Look in 4 directions around node and add neighbors to self.neighbors
     def add_neighbors(self):
@@ -99,12 +101,16 @@ for i in range(20):
 
 # Let's set the flags for start_node and end_nodes.
 start_node_placed = False
+start_pos = [0, 0]
 end_node_placed = False
+end_pos = [0, 0]
 
 # a deque allows us to quickly append and pop instantly. here will go the nodes to be added and searched.
 queue = deque()
 # this will hold all of the nodes we have traveled too.
 visited_nodes = []
+# a flag to tell us when to stop searching for the end.
+bfs_done = True
 
 
 # Let's call a function that will render the grid. Pass in start/end node flags.
@@ -128,12 +134,16 @@ def render_grid():
     # Update the start_node and end_node flags to make sure this is runnable.
     start_flag = False
     end_flag = False
+    global start_pos
+    global end_pos
     for i in range(20):
         for j in range(20):
             if grid[i][j].value == 2:
                 start_flag = True
+                start_pos = [i, j]
             if grid[i][j].value == 3:
                 end_flag = True
+                end_pos = [i, j]
     if not start_flag:
         global start_node_placed
         start_node_placed = False
@@ -191,6 +201,11 @@ def try_start():
             for y in x:
                 y.add_neighbors()
         print("added neighbors")
+        # after adding the correct neighbors, let's try BFS.
+        global bfs_done
+        bfs_done = False
+        # add the start node to the queue!
+        queue.append(grid[start_pos[0]][start_pos[1]])
 
 
 # -------- Main Program Loop -----------
@@ -254,6 +269,38 @@ while not done:
                     y = pos[0] // 32
                     print_neighbors(x, y)
 
+    # run bfs
+    if not bfs_done:
+        # do we have any more nodes left in queue?
+        if len(queue) > 0:
+            # set our current node (starts at start_node pos, ends at end_node pos)
+            current_node = queue.popleft()
+            # change color if we are a neighboring node.
+            if current_node.value == 5:
+                current_node.value = 4
+            # check if we are at the end.
+            if current_node.x == end_pos[0] and current_node.y == end_pos[1]:
+                print("found end node")
+                bfs_done = True
+
+            # if we are not at the end node...
+            else:
+                # get the neighbors of the current node and add them to queue.
+                for neighbor in current_node.neighbors:
+                    # If they are not visited and not an obstacle, keep going.
+                    if not neighbor.visited and neighbor.value != 1:
+                        neighbor.visited = True
+                        # keep start node and end node same colors.
+                        if neighbor.value != 2 and neighbor.value != 3:
+                            neighbor.value = 5
+                        neighbor.previous_node = current_node
+                        queue.append(neighbor)
+
+        # if the queue is empty and we don't have the end node yet, no solution.
+        else:
+            print("no solution")
+            bfs_done = True
+
     # background image
     screen.fill(GRAY)
 
@@ -271,7 +318,7 @@ while not done:
     pygame.display.flip()
 
     # 60 fps unless we decide otherwise
-    clock.tick(60)
+    clock.tick(20)
 
 # Quit after the main loop ends (i.e player presses the "x")
 pygame.quit()
