@@ -47,6 +47,7 @@ blank_space = pygame.image.load("images/blank_space.png").convert()
 obstacle = pygame.image.load("images/obstacle.png").convert()
 unvisited = pygame.image.load("images/unvisited.png").convert()
 visited = pygame.image.load("images/visited.png").convert()
+path_block = pygame.image.load("images/path.png").convert()
 
 # Keep loop running until we quit
 done = False
@@ -65,6 +66,7 @@ class Node:
         self.y = y
         self.previous_node = None
         self.visited = False
+        self.start_node = False
 
     # Look in 4 directions around node and add neighbors to self.neighbors
     def add_neighbors(self):
@@ -91,6 +93,7 @@ class Node:
 # 3 = end node
 # 4 = visited
 # 5 = unvisited
+# 6 = path
 
 # Create the grid, then replace it with new Nodes().
 grid = [[0 for a in range(20)] for b in range(20)]
@@ -107,8 +110,8 @@ end_pos = [0, 0]
 
 # a deque allows us to quickly append and pop instantly. here will go the nodes to be added and searched.
 queue = deque()
-# this will hold all of the nodes we have traveled too.
-visited_nodes = []
+# list to hold path from start to end.
+path = []
 # a flag to tell us when to stop searching for the end.
 bfs_done = True
 
@@ -130,6 +133,8 @@ def render_grid():
                 screen.blit(visited, (32 * j, 32 * i))
             elif grid[i][j].value == 5:
                 screen.blit(unvisited, (32 * j, 32 * i))
+            elif grid[i][j].value == 6:
+                screen.blit(path_block, (32 * j, 32 * i))
 
     # Update the start_node and end_node flags to make sure this is runnable.
     start_flag = False
@@ -204,6 +209,9 @@ def try_start():
         # after adding the correct neighbors, let's try BFS.
         global bfs_done
         bfs_done = False
+        # set the starting point with no previous node.
+        grid[start_pos[0]][start_pos[1]].start_node = True
+        print(grid[start_pos[0]][start_pos[1]].start_node)
         # add the start node to the queue!
         queue.append(grid[start_pos[0]][start_pos[1]])
 
@@ -282,6 +290,15 @@ while not done:
             if current_node.x == end_pos[0] and current_node.y == end_pos[1]:
                 print("found end node")
                 bfs_done = True
+                temp = current_node
+                # retrace our steps!
+                while not temp.previous_node.start_node:
+                    # print(temp.previous_node.y)
+                    path.append(temp.previous_node)
+                    temp = temp.previous_node
+                # change our path visuals.
+                for node in path:
+                    node.value = 6
 
             # if we are not at the end node...
             else:
