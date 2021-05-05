@@ -24,6 +24,9 @@ pygame.font.init()
 WHITE = (255, 255, 255)
 GRAY = (105, 105, 105)
 
+# FPS for drawing grid.
+fps_speed = 60
+
 # Set font and create text objects.
 font = pygame.font.SysFont('Calibri', 24)
 smaller_font = pygame.font.SysFont('Calibri', 18)
@@ -163,6 +166,13 @@ def clear_grid():
     for i in range(20):
         for j in range(20):
             grid[i][j].value = 0
+            grid[i][j].neighbors = []
+            grid[i][j].previous_node = None
+            grid[i][j].start_node = False
+            grid[i][j].visited = False
+            global path
+            path = []
+            queue.clear()
 
 
 def print_grid():
@@ -279,6 +289,8 @@ while not done:
 
     # run bfs
     if not bfs_done:
+        fps_speed = 20
+        print(fps_speed)
         # do we have any more nodes left in queue?
         if len(queue) > 0:
             # set our current node (starts at start_node pos, ends at end_node pos)
@@ -299,6 +311,7 @@ while not done:
                 # change our path visuals.
                 for node in path:
                     node.value = 6
+                fps_speed = 60
 
             # if we are not at the end node...
             else:
@@ -335,7 +348,7 @@ while not done:
     pygame.display.flip()
 
     # 60 fps unless we decide otherwise
-    clock.tick(20)
+    clock.tick(fps_speed)
 
 # Quit after the main loop ends (i.e player presses the "x")
 pygame.quit()
