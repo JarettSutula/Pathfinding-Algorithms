@@ -13,6 +13,7 @@ press Q = place starting node wherever mouse is hovering.
 press E = place ending node wherever mouse is hovering.
 Click button on screen = clear grid.
 press P = print grid's output to console (for testing).
+press I = start BFS.
 """
 from collections import deque
 
@@ -112,11 +113,14 @@ end_node_placed = False
 end_pos = [0, 0]
 
 # a deque allows us to quickly append and pop instantly. here will go the nodes to be added and searched.
-queue = deque()
+bfs_queue = deque()
+# a "stack" will let us use DFS.
+dfs_stack = deque()
 # list to hold path from start to end.
 path = []
 # a flag to tell us when to stop searching for the end.
 bfs_done = True
+dfs_done = True
 
 
 # Let's call a function that will render the grid. Pass in start/end node flags.
@@ -172,7 +176,7 @@ def clear_grid():
             grid[i][j].visited = False
             global path
             path = []
-            queue.clear()
+            bfs_queue.clear()
 
 
 def print_grid():
@@ -210,12 +214,12 @@ def clear_end_node():
                 grid[i][j].value = 0
 
 
-def try_start():
+def bfs_start():
     if start_node_placed and end_node_placed:
         for x in grid:
             for y in x:
                 y.add_neighbors()
-        print("added neighbors")
+        print("added neighbors for BFS")
         # after adding the correct neighbors, let's try BFS.
         global bfs_done
         bfs_done = False
@@ -223,7 +227,22 @@ def try_start():
         grid[start_pos[0]][start_pos[1]].start_node = True
         print(grid[start_pos[0]][start_pos[1]].start_node)
         # add the start node to the queue!
-        queue.append(grid[start_pos[0]][start_pos[1]])
+        bfs_queue.append(grid[start_pos[0]][start_pos[1]])
+
+
+def dfs_start():
+    if start_node_placed and end_node_placed:
+        for x in grid:
+            for y in x:
+                y.add_neighbors()
+        print("added neighbors for DFS")
+        global dfs_done
+        dfs_done = False
+        # set the starting point with no previous node.
+        grid[start_pos[0]][start_pos[1]].start_node = True
+        print(grid[start_pos[0]][start_pos[1]].start_node)
+        # add the start node to the queue!
+        dfs_stack.append(grid[start_pos[0]][start_pos[1]])
 
 
 # -------- Main Program Loop -----------
@@ -278,23 +297,18 @@ while not done:
                 print_flags()
 
             if event.key == pygame.K_i:
-                try_start()
+                bfs_start()
 
             if event.key == pygame.K_u:
-                pos = pygame.mouse.get_pos()
-                if pos[0] < 640:
-                    x = pos[1] // 32
-                    y = pos[0] // 32
-                    print_neighbors(x, y)
+                dfs_start()
 
     # run bfs
     if not bfs_done:
         fps_speed = 20
-        print(fps_speed)
         # do we have any more nodes left in queue?
-        if len(queue) > 0:
+        if len(bfs_queue) > 0:
             # set our current node (starts at start_node pos, ends at end_node pos)
-            current_node = queue.popleft()
+            current_node = bfs_queue.popleft()
             # change color if we are a neighboring node.
             if current_node.value == 5:
                 current_node.value = 4
@@ -324,12 +338,55 @@ while not done:
                         if neighbor.value != 2 and neighbor.value != 3:
                             neighbor.value = 5
                         neighbor.previous_node = current_node
-                        queue.append(neighbor)
+                        bfs_queue.append(neighbor)
 
         # if the queue is empty and we don't have the end node yet, no solution.
         else:
             print("no solution")
             bfs_done = True
+
+    # run dfs
+    if not dfs_done:
+        fps_speed = 20
+        # do we have any more nodes left in stack?
+        if len(dfs_stack) > 0:
+            # set our current node (starts at start_node pos, ends at end_node pos)
+            current_node = dfs_stack.pop()
+            # change color if we are a neighboring node.
+            if current_node.value == 5:
+                current_node.value = 4
+            # check if we are at the end.
+            if current_node.x == end_pos[0] and current_node.y == end_pos[1]:
+                print("found end node")
+                dfs_done = True
+                temp = current_node
+                # retrace our steps!
+                while not temp.previous_node.start_node:
+                    # print(temp.previous_node.y)
+                    path.append(temp.previous_node)
+                    temp = temp.previous_node
+                # change our path visuals.
+                for node in path:
+                    node.value = 6
+                fps_speed = 60
+
+            # if we are not at the end node...
+            else:
+                # get the neighbors of the current node and add them to queue.
+                for neighbor in current_node.neighbors:
+                    # If they are not visited and not an obstacle, keep going.
+                    if not neighbor.visited and neighbor.value != 1:
+                        neighbor.visited = True
+                        # keep start node and end node same colors.
+                        if neighbor.value != 2 and neighbor.value != 3:
+                            neighbor.value = 5
+                        neighbor.previous_node = current_node
+                        dfs_stack.append(neighbor)
+
+        # if the queue is empty and we don't have the end node yet, no solution.
+        else:
+            print("no solution")
+            dfs_done = True
 
     # background image
     screen.fill(GRAY)
