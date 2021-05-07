@@ -89,6 +89,20 @@ class Node:
         if self.y > 0:
             self.neighbors.append(grid[self.x][self.y - 1])
 
+    def add_dfs_neighbors(self):
+        # Add them in the order of desired stack - north -> east -> south -> west
+        if self.y > 0:
+            self.neighbors.append(grid[self.x][self.y - 1])
+        # add South neighbor. x + 1.
+        if self.x < 19:
+            self.neighbors.append(grid[self.x + 1][self.y])
+        # add right neighbor
+        if self.y < 19:
+            self.neighbors.append(grid[self.x][self.y + 1])
+        # add North neighbor
+        if self.x > 0:
+            self.neighbors.append(grid[self.x - 1][self.y])
+
 
 # Let's set the grid that we will use for finding paths. 20x20.
 # 0 = blank space
@@ -177,6 +191,24 @@ def clear_grid():
             global path
             path = []
             bfs_queue.clear()
+            dfs_stack.clear()
+
+
+# Let's reset the grid between searches but without clearing the obstacles and start/end nodes
+def reset_grid():
+    # Loop through the grid and only reset values that are NOT obstacles or nodes.
+    for i in range(20):
+        for j in range(20):
+            if grid[i][j].value > 3:
+                grid[i][j].value = 0
+            grid[i][j].neighbors = []
+            grid[i][j].previous_node = None
+            grid[i][j].start_node = False
+            grid[i][j].visited = False
+            global path
+            path = []
+            bfs_queue.clear()
+            dfs_stack.clear()
 
 
 def print_grid():
@@ -234,7 +266,7 @@ def dfs_start():
     if start_node_placed and end_node_placed:
         for x in grid:
             for y in x:
-                y.add_neighbors()
+                y.add_dfs_neighbors()
         print("added neighbors for DFS")
         global dfs_done
         dfs_done = False
@@ -301,6 +333,9 @@ while not done:
 
             if event.key == pygame.K_u:
                 dfs_start()
+
+            if event.key == pygame.K_SPACE:
+                reset_grid()
 
     # run bfs
     if not bfs_done:
