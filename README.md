@@ -24,9 +24,9 @@ Week-by-week I will update these goals, add or remove goals, and highlight progr
 - [x] Allow the user to create start and end nodes on the grid that the algorithms will traverse between.
 - [x] Allow the user to create obstacles on the grid that the algorithms have to traverse around.
 - [x] Allow the user to clear the grid.
-- [ ] Implement BFS.
-- [ ] Implement DFS.
-- [ ] Implement Dijsktra's Algorithm.
+- [x] Implement BFS.
+- [x] Implement DFS.
+- [x] Implement Dijsktra's Algorithm.
 - [ ] Implement A*.
 - [ ] Allow the user to press a button to go step-by-step through the algorithm's process.
 - [ ] Add UI buttons to clear grid, change algorithms, etc.
