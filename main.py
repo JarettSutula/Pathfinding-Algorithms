@@ -52,6 +52,8 @@ obstacle = pygame.image.load("images/obstacle.png").convert()
 unvisited = pygame.image.load("images/unvisited.png").convert()
 visited = pygame.image.load("images/visited.png").convert()
 path_block = pygame.image.load("images/path.png").convert()
+visited_dijkstras = pygame.image.load("images/visited_dijkstras.png").convert()
+path_block_dijkstras = pygame.image.load("images/path_dijkstras.png").convert()
 
 # Keep loop running until we quit
 done = False
@@ -71,6 +73,7 @@ class Node:
         self.previous_node = None
         self.visited = False
         self.start_node = False
+        self.cost = 0
 
     # Look in 4 directions around node and add neighbors to self.neighbors
     def add_neighbors(self):
@@ -130,11 +133,15 @@ end_pos = [0, 0]
 bfs_queue = deque()
 # a "stack" will let us use DFS.
 dfs_stack = deque()
+# a queue for dijkstras.
+dijkstras_queue = deque()
 # list to hold path from start to end.
 path = []
+dijkstras_path = []
 # a flag to tell us when to stop searching for the end.
 bfs_done = True
 dfs_done = True
+dijkstras_done = True
 
 
 # Let's call a function that will render the grid. Pass in start/end node flags.
@@ -150,10 +157,14 @@ def render_grid():
                 screen.blit(start_node, (32 * j, 32 * i))
             elif grid[i][j].value == 3:
                 screen.blit(end_node, (32 * j, 32 * i))
+            elif grid[i][j].value == 4 and grid[i][j].cost > 0:
+                screen.blit(visited_dijkstras, (32 * j, 32 * i))
             elif grid[i][j].value == 4:
                 screen.blit(visited, (32 * j, 32 * i))
             elif grid[i][j].value == 5:
                 screen.blit(unvisited, (32 * j, 32 * i))
+            elif grid[i][j].value == 6 and grid[i][j].cost > 0:
+                screen.blit(path_block_dijkstras, (32 * j, 32 * i))
             elif grid[i][j].value == 6:
                 screen.blit(path_block, (32 * j, 32 * i))
 
@@ -188,10 +199,14 @@ def clear_grid():
             grid[i][j].previous_node = None
             grid[i][j].start_node = False
             grid[i][j].visited = False
+            grid[i][j].cost = 0
             global path
             path = []
+            global dijkstras_path
+            dijkstras_path = []
             bfs_queue.clear()
             dfs_stack.clear()
+            dijkstras_queue.clear()
 
 
 # Let's reset the grid between searches but without clearing the obstacles and start/end nodes
@@ -205,10 +220,14 @@ def reset_grid():
             grid[i][j].previous_node = None
             grid[i][j].start_node = False
             grid[i][j].visited = False
+            grid[i][j].cost = 0
             global path
             path = []
+            global dijkstras_path
+            dijkstras_path = []
             bfs_queue.clear()
             dfs_stack.clear()
+            dijkstras_queue.clear()
 
 
 def print_grid():
@@ -225,8 +244,8 @@ def print_flags():
 
 
 def print_neighbors(i, j):
-    for node in grid[i][j].neighbors:
-        print(node.x, node.y, node.value)
+    for target_node in grid[i][j].neighbors:
+        print(target_node.x, target_node.y, target_node.value)
     print()
 
 
@@ -275,6 +294,23 @@ def dfs_start():
         print(grid[start_pos[0]][start_pos[1]].start_node)
         # add the start node to the queue!
         dfs_stack.append(grid[start_pos[0]][start_pos[1]])
+
+
+def dijkstras_start():
+    if start_node_placed and end_node_placed:
+        for x in grid:
+            for y in x:
+                # we can use bfs add_neighbors since they work the same way in same-cost grids.
+                y.add_neighbors()
+        print("added neighbors for Dijkstra's Algorithm")
+        # after adding the correct neighbors, let's try BFS.
+        global dijkstras_done
+        dijkstras_done = False
+        # set the starting point with no previous node.
+        grid[start_pos[0]][start_pos[1]].start_node = True
+        print(grid[start_pos[0]][start_pos[1]].start_node)
+        # add the start node to the queue!
+        dijkstras_queue.append(grid[start_pos[0]][start_pos[1]])
 
 
 # -------- Main Program Loop -----------
@@ -333,6 +369,9 @@ while not done:
 
             if event.key == pygame.K_u:
                 dfs_start()
+
+            if event.key == pygame.K_y:
+                dijkstras_start()
 
             if event.key == pygame.K_SPACE:
                 reset_grid()
@@ -422,6 +461,50 @@ while not done:
         else:
             print("no solution")
             dfs_done = True
+
+    # run dijkstra's
+    if not dijkstras_done:
+        fps_speed = 20
+        # do we have any more nodes left in queue?
+        if len(dijkstras_queue) > 0:
+            # set our current node (starts at start_node pos, ends at end_node pos)
+            current_node = dijkstras_queue.popleft()
+            # change color if we are a neighboring node and add cost.
+            if current_node.value == 5:
+                current_node.value = 4
+                current_node.cost = 1
+            # check if we are at the end.
+            if current_node.x == end_pos[0] and current_node.y == end_pos[1]:
+                print("found end node")
+                dijkstras_done = True
+                temp = current_node
+                # retrace our steps!
+                while not temp.previous_node.start_node:
+                    # print(temp.previous_node.y)
+                    dijkstras_path.append(temp.previous_node)
+                    temp = temp.previous_node
+                # change our path visuals.
+                for node in dijkstras_path:
+                    node.value = 6
+                fps_speed = 60
+
+            # if we are not at the end node...
+            else:
+                # get the neighbors of the current node and add them to queue.
+                for neighbor in current_node.neighbors:
+                    # If they are not visited and not an obstacle, keep going.
+                    if not neighbor.visited and neighbor.value != 1:
+                        neighbor.visited = True
+                        # keep start node and end node same colors.
+                        if neighbor.value != 2 and neighbor.value != 3:
+                            neighbor.value = 5
+                        neighbor.previous_node = current_node
+                        dijkstras_queue.append(neighbor)
+
+        # if the queue is empty and we don't have the end node yet, no solution.
+        else:
+            print("no solution")
+            dijkstras_done = True
 
     # background image
     screen.fill(GRAY)
