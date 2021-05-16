@@ -24,6 +24,8 @@ pygame.font.init()
 # Define colors for screen fill, font
 WHITE = (255, 255, 255)
 GRAY = (105, 105, 105)
+GREEN = (0, 128, 0)
+RED = (255, 0, 0)
 
 # FPS for drawing grid.
 fps_speed = 60
@@ -135,6 +137,7 @@ bfs_queue = deque()
 dfs_stack = deque()
 # a queue for dijkstras.
 dijkstras_queue = deque()
+
 # list to hold path from start to end.
 path = []
 dijkstras_path = []
@@ -142,6 +145,10 @@ dijkstras_path = []
 bfs_done = True
 dfs_done = True
 dijkstras_done = True
+# stats for post-algorithm work
+visited_nodes = 0
+path_length = 0
+status = False
 
 
 # Let's call a function that will render the grid. Pass in start/end node flags.
@@ -207,6 +214,12 @@ def clear_grid():
             bfs_queue.clear()
             dfs_stack.clear()
             dijkstras_queue.clear()
+            global visited_nodes
+            global path_length
+            global status
+            visited_nodes = 0
+            path_length = 0
+            status = False
 
 
 # Let's reset the grid between searches but without clearing the obstacles and start/end nodes
@@ -228,6 +241,12 @@ def reset_grid():
             bfs_queue.clear()
             dfs_stack.clear()
             dijkstras_queue.clear()
+            global visited_nodes
+            global path_length
+            global status
+            visited_nodes = 0
+            path_length = 0
+            status = False
 
 
 def print_grid():
@@ -263,6 +282,21 @@ def clear_end_node():
         for j in range(20):
             if grid[i][j].value == 3:
                 grid[i][j].value = 0
+
+
+def update_stats():
+    # at the end of every algorithm run, output the stats.
+    for i in range(20):
+        for j in range(20):
+            # if we have visited a node, count it.
+            if grid[i][j].value == 4:
+                global visited_nodes
+                visited_nodes += 1
+            # if our node is a path, count it as visited and as a path node.
+            if grid[i][j].value == 6:
+                global path_length
+                path_length += 1
+                visited_nodes += 1
 
 
 def bfs_start():
@@ -365,12 +399,15 @@ while not done:
                 print_flags()
 
             if event.key == pygame.K_i:
+                reset_grid()
                 bfs_start()
 
             if event.key == pygame.K_u:
+                reset_grid()
                 dfs_start()
 
             if event.key == pygame.K_y:
+                reset_grid()
                 dijkstras_start()
 
             if event.key == pygame.K_SPACE:
@@ -399,6 +436,8 @@ while not done:
                 # change our path visuals.
                 for node in path:
                     node.value = 6
+                update_stats()
+                status = True
                 fps_speed = 60
 
             # if we are not at the end node...
@@ -418,6 +457,8 @@ while not done:
         else:
             print("no solution")
             bfs_done = True
+            update_stats()
+            status = False
 
     # run dfs
     if not dfs_done:
@@ -442,6 +483,8 @@ while not done:
                 # change our path visuals.
                 for node in path:
                     node.value = 6
+                update_stats()
+                status = True
                 fps_speed = 60
 
             # if we are not at the end node...
@@ -461,6 +504,8 @@ while not done:
         else:
             print("no solution")
             dfs_done = True
+            update_stats()
+            status = False
 
     # run dijkstra's
     if not dijkstras_done:
@@ -486,6 +531,8 @@ while not done:
                 # change our path visuals.
                 for node in dijkstras_path:
                     node.value = 6
+                update_stats()
+                status = True
                 fps_speed = 60
 
             # if we are not at the end node...
@@ -505,6 +552,8 @@ while not done:
         else:
             print("no solution")
             dijkstras_done = True
+            update_stats()
+            status = False
 
     # background image
     screen.fill(GRAY)
@@ -512,12 +561,21 @@ while not done:
     # rendering code
     render_grid()
     screen.blit(clear_text, (660, 100))
-    screen.blit(start_text, (660, 400))
-    screen.blit(end_text, (665, 440))
-    screen.blit(obstacle_text_1, (670, 280))
-    screen.blit(obstacle_text_2, (695, 300))
-    screen.blit(obstacle_text_3, (665, 340))
-    screen.blit(obstacle_text_4, (695, 360))
+    screen.blit(start_text, (660, 550))
+    screen.blit(end_text, (665, 590))
+    screen.blit(obstacle_text_1, (670, 430))
+    screen.blit(obstacle_text_2, (695, 450))
+    screen.blit(obstacle_text_3, (665, 490))
+    screen.blit(obstacle_text_4, (695, 510))
+
+    # if we want to update our stats, blit the text.
+    if visited_nodes > 0:
+        stats_1_text = smaller_font.render('Visited Nodes: ' + str(visited_nodes), True, WHITE)
+        stats_2_text = smaller_font.render('Path Nodes: ' + str(path_length), True, WHITE)
+        stats_3_text = smaller_font.render('Status: ' + ('Succeeded' if status else 'Failed'), True, WHITE if status else RED)
+        screen.blit(stats_1_text, (660, 250))
+        screen.blit(stats_2_text, (660, 270))
+        screen.blit(stats_3_text, (660, 290))
 
     # update screen and flip
     pygame.display.flip()
