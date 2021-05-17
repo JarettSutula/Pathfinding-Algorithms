@@ -76,6 +76,10 @@ class Node:
         self.visited = False
         self.start_node = False
         self.cost = 0
+        # track f, g, h for A* calculations.
+        self.f = 0
+        self.g = 0
+        self.h = 0
 
     # Look in 4 directions around node and add neighbors to self.neighbors
     def add_neighbors(self):
@@ -137,6 +141,9 @@ bfs_queue = deque()
 dfs_stack = deque()
 # a queue for dijkstras.
 dijkstras_queue = deque()
+# 'sets' for A*. Need one of them to be closed so we can compare.
+a_star_open = []
+a_star_closed = []
 
 # list to hold path from start to end.
 path = []
@@ -145,6 +152,7 @@ dijkstras_path = []
 bfs_done = True
 dfs_done = True
 dijkstras_done = True
+a_star_done = True
 # stats for post-algorithm work
 visited_nodes = 0
 path_length = 0
@@ -220,6 +228,10 @@ def clear_grid():
             visited_nodes = 0
             path_length = 0
             status = False
+            global a_star_open
+            global a_star_closed
+            a_star_open = []
+            a_star_closed = []
 
 
 # Let's reset the grid between searches but without clearing the obstacles and start/end nodes
@@ -247,6 +259,10 @@ def reset_grid():
             visited_nodes = 0
             path_length = 0
             status = False
+            global a_star_open
+            global a_star_closed
+            a_star_open = []
+            a_star_closed = []
 
 
 def print_grid():
@@ -299,6 +315,14 @@ def update_stats():
                 visited_nodes += 1
 
 
+def calculate_heuristic(node_a, node_b):
+    # Since we only have 4 directions, use Manhattan Distance between node a and node b.
+    # Manhattan Distance is the absolute value of (node_a.x - node_b.x) - absolute value of (node_a.y - node_b.y).
+    x = abs(node_a.x - node_b.x)
+    y = abs(node_a.y - node_b.y)
+    return x + y
+
+
 def bfs_start():
     if start_node_placed and end_node_placed:
         for x in grid:
@@ -310,7 +334,6 @@ def bfs_start():
         bfs_done = False
         # set the starting point with no previous node.
         grid[start_pos[0]][start_pos[1]].start_node = True
-        print(grid[start_pos[0]][start_pos[1]].start_node)
         # add the start node to the queue!
         bfs_queue.append(grid[start_pos[0]][start_pos[1]])
 
@@ -325,7 +348,6 @@ def dfs_start():
         dfs_done = False
         # set the starting point with no previous node.
         grid[start_pos[0]][start_pos[1]].start_node = True
-        print(grid[start_pos[0]][start_pos[1]].start_node)
         # add the start node to the queue!
         dfs_stack.append(grid[start_pos[0]][start_pos[1]])
 
@@ -337,14 +359,26 @@ def dijkstras_start():
                 # we can use bfs add_neighbors since they work the same way in same-cost grids.
                 y.add_neighbors()
         print("added neighbors for Dijkstra's Algorithm")
-        # after adding the correct neighbors, let's try BFS.
         global dijkstras_done
         dijkstras_done = False
         # set the starting point with no previous node.
         grid[start_pos[0]][start_pos[1]].start_node = True
-        print(grid[start_pos[0]][start_pos[1]].start_node)
         # add the start node to the queue!
         dijkstras_queue.append(grid[start_pos[0]][start_pos[1]])
+
+
+def a_star_start():
+    if start_node_placed and end_node_placed:
+        for x in grid:
+            for y in x:
+                y.add_neighbors()
+        print("added neighbors for A* Algorithm")
+        global a_star_done
+        a_star_done = False
+        # set the starting point with no previous node.
+        grid[start_pos[0]][start_pos[1]].start_node = True
+        # add the start node to the A*'s open set.
+        a_star_open.append(grid[start_pos[0]][start_pos[1]])
 
 
 # -------- Main Program Loop -----------
@@ -409,6 +443,10 @@ while not done:
             if event.key == pygame.K_y:
                 reset_grid()
                 dijkstras_start()
+
+            if event.key == pygame.K_t:
+                reset_grid()
+                a_star_start()
 
             if event.key == pygame.K_SPACE:
                 reset_grid()
@@ -552,6 +590,85 @@ while not done:
         else:
             print("no solution")
             dijkstras_done = True
+            update_stats()
+            status = False
+
+    # run A*
+    if not a_star_done:
+        fps_speed = 20
+        # store end node, as we need to use it to estimate the distance.
+        a_star_end = grid[end_pos[0]][end_pos[1]]
+        # do we have any more nodes left in list?
+        if len(a_star_open) > 0:
+            # set our current node. Needs to be the lowest F cost on open list.
+            # for starting node, all f values will be zero so it will remain the starting node.
+            winning_index = 0
+            for i in range(len(a_star_open)):
+                if a_star_open[i].f < a_star_open[winning_index].f:
+                    winning_index = i
+
+            # now, winning_index should be the index of lowest F cost node.
+            current_node = a_star_open[winning_index]
+            # change color if we are a neighboring node.
+            if current_node.value == 5:
+                current_node.value = 4
+
+            # check if we are at the end.
+            if current_node.x == end_pos[0] and current_node.y == end_pos[1]:
+                print("found end node")
+                a_star_done = True
+                temp = current_node
+                # retrace our steps!
+                while not temp.previous_node.start_node:
+                    path.append(temp.previous_node)
+                    temp = temp.previous_node
+                # change our path visuals.
+                for node in path:
+                    node.value = 6
+                update_stats()
+                status = True
+                fps_speed = 60
+
+            # if we are not at the end node...
+            else:
+                # we need to move the node from the open list to the closed one.
+                a_star_open.remove(current_node)
+                a_star_closed.append(current_node)
+
+                # get the neighbors of the current node and give them g, f, h values.
+                # .. but only if they are not in the closed list already or they are an obstacle.
+                for neighbor in current_node.neighbors:
+                    if neighbor.value == 1 or neighbor in a_star_closed:
+                        # if they are, just ignore everything else and go to next neighbor.
+                        continue
+                    placeholder = current_node.g + 1
+
+                    # now we need to see if the neighbor is in the open list.
+                    # if it is, just update the g value if we need to.
+                    if neighbor in a_star_open:
+                        if placeholder < neighbor.g:
+                            neighbor.g = placeholder
+
+                    # if it's not in either open or closed set, put it in the open set.
+                    else:
+                        if not neighbor.visited and neighbor.value != 1:
+                            neighbor.visited = True
+                            # keep start node and end node same colors.
+                            if neighbor.value != 2 and neighbor.value != 3:
+                                neighbor.value = 5
+                        neighbor.g = placeholder
+                        a_star_open.append(neighbor)
+
+                    # track previous node.
+                    neighbor.previous_node = current_node
+                    # update h and f according to heuristic and g.
+                    neighbor.h = calculate_heuristic(neighbor, a_star_end)
+                    neighbor.f = neighbor.g + neighbor.h
+
+        # if the open list is empty and we don't have the end node yet, no solution.
+        else:
+            print("no solution")
+            a_star_done = True
             update_stats()
             status = False
 
