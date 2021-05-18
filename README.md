@@ -28,8 +28,8 @@ Week-by-week I will update these goals, add or remove goals, and highlight progr
 - [x] Implement DFS.
 - [x] Implement Dijsktra's Algorithm.
 - [x] Implement A*.
-- [ ] Allow the user to press a button to go step-by-step through the algorithm's process.
-- [ ] Add UI buttons to clear grid, change algorithms, etc.
+- [x] Allow the user to press a button to go step-by-step through the algorithm's process.
+- [x] Add UI buttons to clear grid, change algorithms, etc.
 
 <p align="center">
   <img src="https://upload.wikimedia.org/wikipedia/en/thumb/4/4b/Marist_College_Seal_-_Vector.svg/1200px-Marist_College_Seal_-    _Vector.svg.png" width="150" height="150" />
