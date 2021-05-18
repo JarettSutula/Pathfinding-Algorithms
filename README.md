@@ -27,7 +27,7 @@ Week-by-week I will update these goals, add or remove goals, and highlight progr
 - [x] Implement BFS.
 - [x] Implement DFS.
 - [x] Implement Dijsktra's Algorithm.
-- [ ] Implement A*.
+- [x] Implement A*.
 - [ ] Allow the user to press a button to go step-by-step through the algorithm's process.
 - [ ] Add UI buttons to clear grid, change algorithms, etc.
 
