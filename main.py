@@ -2,18 +2,14 @@
 Author: Jarett Sutula
 Pathfinding Algorithms Thesis Project
 
-For now, this will serve as the main file for the project.
-As the project grows, this will be split into separate files for
-ease of reading and working.
-
 General controls:
 Left click mouse = place obstacle block.
 Right click mouse = set grid block back to blank block.
 press Q = place starting node wherever mouse is hovering.
 press E = place ending node wherever mouse is hovering.
-Click button on screen = clear grid.
-press P = print grid's output to console (for testing).
-press I = start BFS.
+Click 'Clear Grid' button on screen = clear grid.
+Click buttons on right side = Run different algorithms
+
 """
 from collections import deque
 
@@ -33,6 +29,7 @@ fps_speed = 60
 # Set font and create text objects.
 font = pygame.font.SysFont('Calibri', 24)
 smaller_font = pygame.font.SysFont('Calibri', 18)
+smallest_font = pygame.font.SysFont('Calibri', 12)
 clear_text = font.render('Click to clear the grid', True, WHITE)
 start_text = smaller_font.render('Press Q to create start node', True, WHITE)
 end_text = smaller_font.render('Press E to create end node', True, WHITE)
@@ -40,6 +37,8 @@ obstacle_text_1 = smaller_font.render('Click and drag left mouse', True, WHITE)
 obstacle_text_2 = smaller_font.render('to create obstacles', True, WHITE)
 obstacle_text_3 = smaller_font.render('Click and drag right mouse', True, WHITE)
 obstacle_text_4 = smaller_font.render('to erase obstacles', True, WHITE)
+diagonal_priority1 = smallest_font.render('diagonal movement', True, WHITE)
+diagonal_priority2 = smallest_font.render('priority for A*', True, WHITE)
 
 # Set the width and height of the screen. 20x20 of 32 pixel pngs
 size = (880, 640)
@@ -56,6 +55,15 @@ visited = pygame.image.load("images/visited.png").convert()
 path_block = pygame.image.load("images/path.png").convert()
 visited_dijkstras = pygame.image.load("images/visited_dijkstras.png").convert()
 path_block_dijkstras = pygame.image.load("images/path_dijkstras.png").convert()
+
+# Import algorithm buttons as pngs.
+astar = pygame.image.load("images/astar.png").convert()
+bfs = pygame.image.load("images/bfs.png").convert()
+da = pygame.image.load("images/da.png").convert()
+dfs = pygame.image.load("images/dfs.png").convert()
+on = pygame.image.load("images/on.png").convert()
+off = pygame.image.load("images/off.png").convert()
+
 
 # Keep loop running until we quit
 done = False
@@ -157,6 +165,9 @@ a_star_done = True
 visited_nodes = 0
 path_length = 0
 status = False
+
+# a flag to track if A* is using diagonal movement heuristic.
+diagonal_movement = False
 
 
 # Let's call a function that will render the grid. Pass in start/end node flags.
@@ -269,7 +280,7 @@ def print_grid():
     # Print out the grid into console.
     for x in grid:
         for y in x:
-            print(y.h, end=" ")
+            print(y.value, end=" ")
         print()
 
 
@@ -318,15 +329,20 @@ def update_stats():
 def calculate_heuristic(node_a, node_b):
     # Since we only have 4 directions, use Manhattan Distance between node a and node b.
     # Manhattan Distance is the absolute value of (node_a.x - node_b.x) - absolute value of (node_a.y - node_b.y).
-    x = abs(node_a.x - node_b.x)
-    y = abs(node_a.y - node_b.y)
-    # Manhattan Distance with an emphasis on diagonal movement
-    # x = abs(node_a.x - node_b.x) ** 2
-    # y = abs(node_a.y - node_b.y) ** 2
+    if not diagonal_movement:
+        x = abs(node_a.x - node_b.x)
+        y = abs(node_a.y - node_b.y)
+
+    # Manhattan Distance with an emphasis on diagonal movement.
+    # on much larger grids, this can increase computation time.
+    else:
+        x = abs(node_a.x - node_b.x) ** 2
+        y = abs(node_a.y - node_b.y) ** 2
     return x + y
 
 
 def bfs_start():
+    reset_grid()
     if start_node_placed and end_node_placed:
         for x in grid:
             for y in x:
@@ -342,6 +358,7 @@ def bfs_start():
 
 
 def dfs_start():
+    reset_grid()
     if start_node_placed and end_node_placed:
         for x in grid:
             for y in x:
@@ -356,6 +373,7 @@ def dfs_start():
 
 
 def dijkstras_start():
+    reset_grid()
     if start_node_placed and end_node_placed:
         for x in grid:
             for y in x:
@@ -371,6 +389,7 @@ def dijkstras_start():
 
 
 def a_star_start():
+    reset_grid()
     if start_node_placed and end_node_placed:
         for x in grid:
             for y in x:
@@ -391,13 +410,37 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
 
-        # Check if we clicked the "clear grid" button.
+        # Check if we clicked on the right side for various buttons.
+        # "clear grid" text.
         if event.type == pygame.MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
             if 650 < pos[0] < 860 and 90 < pos[1] < 130:
                 clear_grid()
                 start_node_placed = False
                 end_node_placed = False
+
+            # Check if we clicked BFS.
+            elif 650 < pos[0] < 690 and 150 < pos[1] < 190:
+                bfs_start()
+
+            # Check if we clicked DFS.
+            elif 710 < pos[0] < 750 and 150 < pos[1] < 190:
+                dfs_start()
+
+            # Check if we clicked Dijkstra's.
+            elif 770 < pos[0] < 810 and 150 < pos[1] < 190:
+                dijkstras_start()
+
+            # Check if we clicked A*.
+            elif 830 < pos[0] < 870 and 150 < pos[1] < 190:
+                a_star_start()
+
+            # Check if we clicked Diagonal Movement Heuristic button.
+            elif 830 < pos[0] < 870 and 210 < pos[1] < 250:
+                if diagonal_movement:
+                    diagonal_movement = False
+                else:
+                    diagonal_movement = True
 
         # Check for mouse pressed down.
         if event.type == pygame.MOUSEMOTION:
@@ -434,25 +477,6 @@ while not done:
 
             if event.key == pygame.K_o:
                 print_flags()
-
-            if event.key == pygame.K_i:
-                reset_grid()
-                bfs_start()
-
-            if event.key == pygame.K_u:
-                reset_grid()
-                dfs_start()
-
-            if event.key == pygame.K_y:
-                reset_grid()
-                dijkstras_start()
-
-            if event.key == pygame.K_t:
-                reset_grid()
-                a_star_start()
-
-            if event.key == pygame.K_SPACE:
-                reset_grid()
 
     # run bfs
     if not bfs_done:
@@ -688,14 +712,26 @@ while not done:
     screen.blit(obstacle_text_3, (665, 490))
     screen.blit(obstacle_text_4, (695, 510))
 
+    # render algorithm buttons.
+    screen.blit(bfs, (650, 150))
+    screen.blit(dfs, (710, 150))
+    screen.blit(da, (770, 150))
+    screen.blit(astar, (830, 150))
+    if diagonal_movement:
+        screen.blit(on, (830, 210))
+    else:
+        screen.blit(off, (830, 210))
+    screen.blit(diagonal_priority1, (725, 220))
+    screen.blit(diagonal_priority2, (740, 230))
+
     # if we want to update our stats, blit the text.
     if visited_nodes > 0:
         stats_1_text = smaller_font.render('Visited Nodes: ' + str(visited_nodes), True, WHITE)
         stats_2_text = smaller_font.render('Path Nodes: ' + str(path_length), True, WHITE)
         stats_3_text = smaller_font.render('Status: ' + ('Succeeded' if status else 'Failed'), True, WHITE if status else RED)
-        screen.blit(stats_1_text, (660, 250))
-        screen.blit(stats_2_text, (660, 270))
-        screen.blit(stats_3_text, (660, 290))
+        screen.blit(stats_1_text, (660, 320))
+        screen.blit(stats_2_text, (660, 340))
+        screen.blit(stats_3_text, (660, 360))
 
     # update screen and flip
     pygame.display.flip()
