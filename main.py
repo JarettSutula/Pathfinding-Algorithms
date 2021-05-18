@@ -22,6 +22,7 @@ WHITE = (255, 255, 255)
 GRAY = (105, 105, 105)
 GREEN = (0, 128, 0)
 RED = (255, 0, 0)
+BLACK = (0, 0, 0)
 
 # FPS for drawing grid.
 fps_speed = 60
@@ -168,6 +169,7 @@ status = False
 
 # a flag to track if A* is using diagonal movement heuristic.
 diagonal_movement = False
+display_f = False
 
 
 # Let's call a function that will render the grid. Pass in start/end node flags.
@@ -226,6 +228,9 @@ def clear_grid():
             grid[i][j].start_node = False
             grid[i][j].visited = False
             grid[i][j].cost = 0
+            grid[i][j].f = 0
+            grid[i][j].g = 0
+            grid[i][j].h = 0
             global path
             path = []
             global dijkstras_path
@@ -257,6 +262,9 @@ def reset_grid():
             grid[i][j].start_node = False
             grid[i][j].visited = False
             grid[i][j].cost = 0
+            grid[i][j].f = 0
+            grid[i][j].g = 0
+            grid[i][j].h = 0
             global path
             path = []
             global dijkstras_path
@@ -289,10 +297,27 @@ def print_flags():
     print(end_node_placed)
 
 
+# Let the loop know that we shouldn't be accepting inputs at the moment.
+def is_running():
+    if not dfs_done or not bfs_done or not dijkstras_done or not a_star_done:
+        return True
+    else:
+        return False
+
+
 def print_neighbors(i, j):
     for target_node in grid[i][j].neighbors:
         print(target_node.x, target_node.y, target_node.value)
     print()
+
+
+def print_f_values():
+    for i in range(20):
+        for j in range(20):
+            if grid[i][j].f > 0:
+                target_node = grid[i][j]
+                f_val = smallest_font.render(str(target_node.f), True, BLACK)
+                screen.blit(f_val, (target_node.y * 32 + 10, target_node.x *32 + 10))
 
 
 def clear_start_node():
@@ -412,7 +437,7 @@ while not done:
 
         # Check if we clicked on the right side for various buttons.
         # "clear grid" text.
-        if event.type == pygame.MOUSEBUTTONUP:
+        if event.type == pygame.MOUSEBUTTONUP and not is_running():
             pos = pygame.mouse.get_pos()
             if 650 < pos[0] < 860 and 90 < pos[1] < 130:
                 clear_grid()
@@ -443,7 +468,7 @@ while not done:
                     diagonal_movement = True
 
         # Check for mouse pressed down.
-        if event.type == pygame.MOUSEMOTION:
+        if event.type == pygame.MOUSEMOTION and not is_running():
             pos = pygame.mouse.get_pos()
             if pos[0] < 640:
                 # Set the corresponding grid value to new value.
@@ -455,7 +480,7 @@ while not done:
                 if pygame.mouse.get_pressed()[2]:
                     grid[pos[1] // 32][pos[0] // 32].value = 0
 
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN and not is_running():
             # Check for pressing down start_node button
             if event.key == pygame.K_q:
                 pos = pygame.mouse.get_pos()
@@ -477,6 +502,12 @@ while not done:
 
             if event.key == pygame.K_o:
                 print_flags()
+
+            if event.key == pygame.K_f:
+                if display_f:
+                    display_f = False
+                else:
+                    display_f = True
 
     # run bfs
     if not bfs_done:
@@ -704,6 +735,8 @@ while not done:
 
     # rendering code
     render_grid()
+    if display_f:
+        print_f_values()
     screen.blit(clear_text, (660, 100))
     screen.blit(start_text, (660, 550))
     screen.blit(end_text, (665, 590))
