@@ -269,7 +269,7 @@ def print_grid():
     # Print out the grid into console.
     for x in grid:
         for y in x:
-            print(y.value, end=" ")
+            print(y.h, end=" ")
         print()
 
 
@@ -320,6 +320,9 @@ def calculate_heuristic(node_a, node_b):
     # Manhattan Distance is the absolute value of (node_a.x - node_b.x) - absolute value of (node_a.y - node_b.y).
     x = abs(node_a.x - node_b.x)
     y = abs(node_a.y - node_b.y)
+    # Manhattan Distance with an emphasis on diagonal movement
+    # x = abs(node_a.x - node_b.x) ** 2
+    # y = abs(node_a.y - node_b.y) ** 2
     return x + y
 
 
