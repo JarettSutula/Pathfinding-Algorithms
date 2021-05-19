@@ -3,6 +3,9 @@
 <p align="center">
     <a href="https://www.python.org/" alt="python">
         <img src="https://img.shields.io/badge/Made%20with-Python-1f425f.svg" /></a>
+ <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/JarettSutula/Pathfinding-Algorithms?color=orange">
+ <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github.com/JarettSutula/Pathfinding-Algorithms?color=green">
+ 
 </p>  
       
 A simple visual approach to explaining pathfinding algorithms.  
