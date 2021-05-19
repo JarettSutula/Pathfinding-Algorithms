@@ -55,8 +55,6 @@ obstacle = pygame.image.load("images/obstacle.png").convert()
 unvisited = pygame.image.load("images/unvisited.png").convert()
 visited = pygame.image.load("images/visited.png").convert()
 path_block = pygame.image.load("images/path.png").convert()
-visited_dijkstras = pygame.image.load("images/visited_dijkstras.png").convert()
-path_block_dijkstras = pygame.image.load("images/path_dijkstras.png").convert()
 
 # Import algorithm buttons as pngs.
 astar = pygame.image.load("images/astar.png").convert()
@@ -149,15 +147,15 @@ end_pos = [0, 0]
 bfs_queue = deque()
 # a "stack" will let us use DFS.
 dfs_stack = deque()
-# a queue for dijkstras.
-dijkstras_queue = deque()
+# # a queue for dijkstras.
+# dijkstras_queue = deque()
 
 # 'sets' for A*. Need one of them to be closed so we can compare.
 a_star_open = []
 a_star_closed = []
 # list to hold path from start to end.
 path = []
-dijkstras_path = []
+# dijkstras_path = []
 
 # a flag to tell us when to stop searching for the end.
 bfs_done = True
@@ -174,7 +172,6 @@ status = False
 diagonal_movement = False
 show_f_values = False
 
-
 # Let's call a function that will render the grid. Pass in start/end node flags.
 def render_grid():
     # Loop through the entirety of the grid and render the correct png.
@@ -188,14 +185,10 @@ def render_grid():
                 screen.blit(start_node, (32 * j, 32 * i))
             elif grid[i][j].value == 3:
                 screen.blit(end_node, (32 * j, 32 * i))
-            elif grid[i][j].value == 4 and grid[i][j].cost > 0:
-                screen.blit(visited_dijkstras, (32 * j, 32 * i))
             elif grid[i][j].value == 4:
                 screen.blit(visited, (32 * j, 32 * i))
             elif grid[i][j].value == 5:
                 screen.blit(unvisited, (32 * j, 32 * i))
-            elif grid[i][j].value == 6 and grid[i][j].cost > 0:
-                screen.blit(path_block_dijkstras, (32 * j, 32 * i))
             elif grid[i][j].value == 6:
                 screen.blit(path_block, (32 * j, 32 * i))
 
@@ -236,11 +229,8 @@ def clear_grid():
             grid[i][j].h = 0
             global path
             path = []
-            global dijkstras_path
-            dijkstras_path = []
             bfs_queue.clear()
             dfs_stack.clear()
-            dijkstras_queue.clear()
             global visited_nodes
             global path_length
             global status
@@ -270,11 +260,8 @@ def reset_grid():
             grid[i][j].h = 0
             global path
             path = []
-            global dijkstras_path
-            dijkstras_path = []
             bfs_queue.clear()
             dfs_stack.clear()
-            dijkstras_queue.clear()
             global visited_nodes
             global path_length
             global status
@@ -315,7 +302,16 @@ def print_f_values():
             if grid[i][j].f > 0:
                 target_node = grid[i][j]
                 f_val = smallest_font.render(str(target_node.f), True, BLACK)
-                screen.blit(f_val, (target_node.y * 32 + 10, target_node.x *32 + 10))
+                screen.blit(f_val, (target_node.y * 32 + 12, target_node.x * 32 + 12))
+
+
+def print_cost_values():
+    for i in range(20):
+        for j in range(20):
+            if grid[i][j].cost > 0:
+                target_node = grid[i][j]
+                cost_value = smallest_font.render(str(target_node.cost), True, BLACK)
+                screen.blit(cost_value, (target_node.y * 32 + 12, target_node.x * 32 + 12))
 
 
 def clear_start_node():
@@ -405,7 +401,7 @@ def dijkstras_start():
         global dijkstras_done
         dijkstras_done = False
         grid[start_pos[0]][start_pos[1]].start_node = True
-        dijkstras_queue.append(grid[start_pos[0]][start_pos[1]])
+        bfs_queue.append(grid[start_pos[0]][start_pos[1]])
 
 
 def a_star_start():
@@ -599,13 +595,12 @@ while not done:
     if not dijkstras_done:
         fps_speed = 20
         # do we have any more nodes left in queue?
-        if len(dijkstras_queue) > 0:
+        if len(bfs_queue) > 0:
             # set our current node (starts at start_node pos, ends at end_node pos)
-            current_node = dijkstras_queue.popleft()
+            current_node = bfs_queue.popleft()
             # change color if we are a neighboring node and add cost.
             if current_node.value == 5:
                 current_node.value = 4
-                current_node.cost = 1
             # check if we are at the end.
             if current_node.x == end_pos[0] and current_node.y == end_pos[1]:
                 print("found end node")
@@ -614,10 +609,10 @@ while not done:
                 # retrace our steps!
                 while not temp.previous_node.start_node:
                     # print(temp.previous_node.y)
-                    dijkstras_path.append(temp.previous_node)
+                    path.append(temp.previous_node)
                     temp = temp.previous_node
                 # change our path visuals.
-                for node in dijkstras_path:
+                for node in path:
                     node.value = 6
                 update_stats()
                 status = True
@@ -630,11 +625,12 @@ while not done:
                     # If they are not visited and not an obstacle, keep going.
                     if not neighbor.visited and neighbor.value != 1:
                         neighbor.visited = True
+                        neighbor.cost = current_node.cost + 1
                         # keep start node and end node same colors.
                         if neighbor.value != 2 and neighbor.value != 3:
                             neighbor.value = 5
                         neighbor.previous_node = current_node
-                        dijkstras_queue.append(neighbor)
+                        bfs_queue.append(neighbor)
 
         # if the queue is empty and we don't have the end node yet, no solution.
         else:
@@ -730,6 +726,8 @@ while not done:
     if show_f_values:
         print_f_values()
 
+    print_cost_values()
+
     # render text on screen.
     screen.blit(clear_text, (660, 100))
     screen.blit(start_text, (660, 550))
@@ -745,7 +743,7 @@ while not done:
     screen.blit(da, (770, 150))
     screen.blit(astar, (830, 150))
 
-    # Conditionals for A* that can be triggered.
+    # Conditionals for A* and Dijkstra's that can be triggered.
     if diagonal_movement:
         screen.blit(on, (830, 210))
     else:
