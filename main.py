@@ -40,6 +40,7 @@ obstacle_text_3 = smaller_font.render('Click and drag right mouse', True, WHITE)
 obstacle_text_4 = smaller_font.render('to erase obstacles', True, WHITE)
 diagonal_priority1 = smallest_font.render('diagonal movement', True, WHITE)
 diagonal_priority2 = smallest_font.render('priority for A*', True, WHITE)
+show_f = smallest_font.render('show f values', True, WHITE)
 
 # Set the width and height of the screen. 20x20 of 32 pixel pngs
 size = (880, 640)
@@ -150,18 +151,20 @@ bfs_queue = deque()
 dfs_stack = deque()
 # a queue for dijkstras.
 dijkstras_queue = deque()
+
 # 'sets' for A*. Need one of them to be closed so we can compare.
 a_star_open = []
 a_star_closed = []
-
 # list to hold path from start to end.
 path = []
 dijkstras_path = []
+
 # a flag to tell us when to stop searching for the end.
 bfs_done = True
 dfs_done = True
 dijkstras_done = True
 a_star_done = True
+
 # stats for post-algorithm work
 visited_nodes = 0
 path_length = 0
@@ -169,7 +172,7 @@ status = False
 
 # a flag to track if A* is using diagonal movement heuristic.
 diagonal_movement = False
-display_f = False
+show_f_values = False
 
 
 # Let's call a function that will render the grid. Pass in start/end node flags.
@@ -292,11 +295,6 @@ def print_grid():
         print()
 
 
-def print_flags():
-    print(start_node_placed)
-    print(end_node_placed)
-
-
 # Let the loop know that we shouldn't be accepting inputs at the moment.
 def is_running():
     if not dfs_done or not bfs_done or not dijkstras_done or not a_star_done:
@@ -363,6 +361,7 @@ def calculate_heuristic(node_a, node_b):
     else:
         x = abs(node_a.x - node_b.x) ** 2
         y = abs(node_a.y - node_b.y) ** 2
+
     return x + y
 
 
@@ -391,9 +390,7 @@ def dfs_start():
         print("added neighbors for DFS")
         global dfs_done
         dfs_done = False
-        # set the starting point with no previous node.
         grid[start_pos[0]][start_pos[1]].start_node = True
-        # add the start node to the queue!
         dfs_stack.append(grid[start_pos[0]][start_pos[1]])
 
 
@@ -407,9 +404,7 @@ def dijkstras_start():
         print("added neighbors for Dijkstra's Algorithm")
         global dijkstras_done
         dijkstras_done = False
-        # set the starting point with no previous node.
         grid[start_pos[0]][start_pos[1]].start_node = True
-        # add the start node to the queue!
         dijkstras_queue.append(grid[start_pos[0]][start_pos[1]])
 
 
@@ -422,9 +417,7 @@ def a_star_start():
         print("added neighbors for A* Algorithm")
         global a_star_done
         a_star_done = False
-        # set the starting point with no previous node.
         grid[start_pos[0]][start_pos[1]].start_node = True
-        # add the start node to the A*'s open set.
         a_star_open.append(grid[start_pos[0]][start_pos[1]])
 
 
@@ -467,6 +460,13 @@ while not done:
                 else:
                     diagonal_movement = True
 
+            # Check if we clicked show f values button.
+            elif 830 < pos[0] < 870 and 270 < pos[1] < 310:
+                if show_f_values:
+                    show_f_values = False
+                else:
+                    show_f_values = True
+
         # Check for mouse pressed down.
         if event.type == pygame.MOUSEMOTION and not is_running():
             pos = pygame.mouse.get_pos()
@@ -497,17 +497,9 @@ while not done:
                     grid[pos[1]//32][pos[0]//32].value = 3
                     end_node_placed = True
 
+            # Print out grid into console for debugging.
             if event.key == pygame.K_p:
                 print_grid()
-
-            if event.key == pygame.K_o:
-                print_flags()
-
-            if event.key == pygame.K_f:
-                if display_f:
-                    display_f = False
-                else:
-                    display_f = True
 
     # run bfs
     if not bfs_done:
@@ -735,8 +727,10 @@ while not done:
 
     # rendering code
     render_grid()
-    if display_f:
+    if show_f_values:
         print_f_values()
+
+    # render text on screen.
     screen.blit(clear_text, (660, 100))
     screen.blit(start_text, (660, 550))
     screen.blit(end_text, (665, 590))
@@ -750,12 +744,21 @@ while not done:
     screen.blit(dfs, (710, 150))
     screen.blit(da, (770, 150))
     screen.blit(astar, (830, 150))
+
+    # Conditionals for A* that can be triggered.
     if diagonal_movement:
         screen.blit(on, (830, 210))
     else:
         screen.blit(off, (830, 210))
+    if show_f_values:
+        screen.blit(on, (830, 270))
+    else:
+        screen.blit(off, (830, 270))
+
+    # Display A* conditional labels
     screen.blit(diagonal_priority1, (725, 220))
     screen.blit(diagonal_priority2, (740, 230))
+    screen.blit(show_f, (750, 285))
 
     # if we want to update our stats, blit the text.
     if visited_nodes > 0:
