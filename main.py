@@ -623,7 +623,7 @@ while not done:
                 # get the neighbors of the current node and add them to queue.
                 for neighbor in current_node.neighbors:
                     # If they are not visited and not an obstacle, keep going.
-                    if not neighbor.visited and neighbor.value != 1:
+                    if not neighbor.visited and neighbor.value != 1 and neighbor.value != 2:
                         neighbor.visited = True
                         neighbor.cost = current_node.cost + 1
                         # keep start node and end node same colors.
