@@ -26,6 +26,7 @@ BLACK = (0, 0, 0)
 
 # FPS for drawing grid.
 fps_speed = 60
+run_speed = 20
 
 # Set font and create text objects.
 font = pygame.font.SysFont('Calibri', 24)
@@ -499,7 +500,7 @@ while not done:
 
     # run bfs
     if not bfs_done:
-        fps_speed = 20
+        fps_speed = run_speed
         # do we have any more nodes left in queue?
         if len(bfs_queue) > 0:
             # set our current node (starts at start_node pos, ends at end_node pos)
@@ -546,7 +547,7 @@ while not done:
 
     # run dfs
     if not dfs_done:
-        fps_speed = 20
+        fps_speed = run_speed
         # do we have any more nodes left in stack?
         if len(dfs_stack) > 0:
             # set our current node (starts at start_node pos, ends at end_node pos)
@@ -593,7 +594,7 @@ while not done:
 
     # run dijkstra's
     if not dijkstras_done:
-        fps_speed = 20
+        fps_speed = run_speed
         # do we have any more nodes left in queue?
         if len(bfs_queue) > 0:
             # set our current node (starts at start_node pos, ends at end_node pos)
@@ -641,7 +642,7 @@ while not done:
 
     # run A*
     if not a_star_done:
-        fps_speed = 20
+        fps_speed = run_speed
         # store end node, as we need to use it to estimate the distance.
         a_star_end = grid[end_pos[0]][end_pos[1]]
         # do we have any more nodes left in list?
