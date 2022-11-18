@@ -60,7 +60,7 @@ BFS, or Breadth First Search, begins its approach at the start node ( <img src= 
   <img src= "images/bfs_gif1.gif" width="500">  
 </p>
 <p align="center">
-  <sub><sup> Figure 1: BFS in action finding the end node.</sub></sup>
+  <sub> Figure 1: BFS in action finding the end node.</sub>
 </p>
 
 ### **Depth First Search** 
@@ -69,7 +69,7 @@ DFS, or Depth first Search, begins its approach at the start node. This time, ho
   <img src= "images/dfs_gif1.gif" width="500">  
 </p>
 <p align="center">
-  <sub><sup> Figure 2: DFS following direction priority until it finds the end node.</sub></sup>
+  <sub>Figure 2: DFS following direction priority until it finds the end node.</sub>
 </p>
 
 ### **Dijkstra's Algorithm** 
@@ -78,7 +78,7 @@ DA, or Dijkstra's Algorithm weighs the cost of each node and takes the path of l
   <img src= "images/da_gif1.gif" width="500">  
 </p>
 <p align="center">
-  <sub><sup> Figure 3: DA expanding evenly-costly nodes until it finds the end node.</sub></sup>
+  <sub>Figure 3: DA expanding evenly-costly nodes until it finds the end node.</sub>
 </p>
 
 ### **A Star** 
@@ -87,7 +87,7 @@ A*, or A Star, is a tweak of Dijkstra's Algorithm that calculates the difference
   <img src= "images/astar_gif1.gif" width="500">  
 </p>
 <p align="center">
-  <sub><sup> Figure 4: A* prioritizing movement towards the end node using the Manhattan Distance as a heuristic.</sub></sup>
+  <sub>Figure 4: A* prioritizing movement towards the end node using the Manhattan Distance as a heuristic.</sub>
 </p>
 
 A* proves to be as effective as BFS in finding the optimal path between two nodes, and most of the time it will search less overall nodes. We can tweak the heuristic to match our situations. A fun one to try is the Manhattan Distance Squared, which makes the algorithm very greedy. In some cases it finds the end node even faster, and sometimes it gets tunnel vision and ends up dramatically increasing the amount of time to find the node. While it does not guarantee the shortest optimal path like the Manhattan Distance heuristic A*, it is interesting to see it tackle the same problems.
@@ -95,7 +95,7 @@ A* proves to be as effective as BFS in finding the optimal path between two node
   <img src= "images/astar_gif2.gif" width="500">  
 </p>
 <p align="center">
-  <sub><sup> Figure 5: A* using the Manhattan Distance Squared heuristic on the same problem as Figure 4. It visits less nodes, but has a longer path.</sub></sup>
+  <sub> Figure 5: A* using the Manhattan Distance Squared heuristic on the same problem as Figure 4. It visits less nodes, but has a longer path.</sub>
 </p>
 
 # Final Notes 
